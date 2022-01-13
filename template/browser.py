@@ -36,7 +36,7 @@ async def main(pc):
         def on_message(message):
             global RUNNING, HEALTHCHECKS, VERBOSE
             if message == 'active':
-                HEALTHCHECKS = 10
+                HEALTHCHECKS = 100
                 if VERBOSE:
                     print("[RENEW] Healthcheck")
             elif message == 'esc':
@@ -74,7 +74,7 @@ async def main(pc):
                     channel.send(f"{chr(key)}")
                 else:
                     img = cv2.imread(f'controller/controller.jpg')
-                await asyncio.sleep(0.01)
+                await asyncio.sleep(1)
             cv2.destroyAllWindows()
             RUNNING = False
 
@@ -86,18 +86,36 @@ async def main(pc):
     print(object_to_string(pc.localDescription))
     await step2_running_loop()
 
+def watch_streaming(link):
+    cap = cv2.VideoCapture()
+    cv2.namedWindow("camCapture", cv2.WINDOW_AUTOSIZE)
+    cap.open(f'rtmp://{link}/rtmp/live')
+
+    while cap.isOpened():
+        success, img = cap.read()
+        if success:
+            if cv2.waitKey(1) & 0xFF == ord('q'):
+                break
+            cv2.imshow("camCapture", img)      
+    cap.release()
+
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action='store_true')
+    parser.add_argument("--ip", required=True)
     args = vars(parser.parse_args())
     VERBOSE = args['verbose']
 
     # Run main event loop
     pc = RTCPeerConnection()
     coro = main(pc)
+    thread = threading.Thread(target=watch_streaming, args=(args['ip']))
+    thread.start()
     try:
+
         loop = asyncio.get_event_loop()
         loop.run_until_complete(coro)
+        thread.join()
     except KeyboardInterrupt:
         pass
