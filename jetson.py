@@ -19,6 +19,10 @@ def Move(message,Motor):
         MotorForward(Motor)
     elif message =="s":
         MotorBackward(Motor)
+    elif message =="a":
+        MotorLeftward(Motor)
+    elif message =="d":
+        MotorRightward(Motor)
 
 def MotorForward(Motor):
     Motor.MotorRun(0, 'forward', 100)
