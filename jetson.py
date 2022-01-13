@@ -4,7 +4,6 @@ import logging
 import threading
 import argparse
 import asyncio
-import argparse
 
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.contrib.signaling import object_to_string, object_from_string
@@ -102,28 +101,17 @@ async def main(pc,Motor):
     await step2_running_loop()
 
 
-
-
-
-
-
-
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action='store_true')
     args = vars(parser.parse_args())
     VERBOSE = args['verbose']
     Motor = MotorDriver()
-    
     # Run main event loop
     pc = RTCPeerConnection()
     coro = main(pc,Motor)
-    # === streaming ===
-
     try:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(coro)
-
-
     except KeyboardInterrupt:
         pass

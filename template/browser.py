@@ -103,7 +103,6 @@ def watch_streaming(link):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action='store_true')
-    parser.add_argument("--ip", required=True)
     args = vars(parser.parse_args())
     VERBOSE = args['verbose']
 
