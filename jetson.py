@@ -19,9 +19,9 @@ def Move(message,Motor):
         MotorForward(Motor)
     elif message =="s":
         MotorBackward(Motor)
-    elif message =="a":
-        MotorLeftward(Motor)
     elif message =="d":
+        MotorLeftward(Motor)
+    elif message =="a":
         MotorRightward(Motor)
 
 def MotorForward(Motor):
