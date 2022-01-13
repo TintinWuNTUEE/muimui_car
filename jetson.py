@@ -144,7 +144,7 @@ def gstreamer_rtmpstream(queue):
             "nvv4l2h264enc bitrate=8000000 ! "
             "h264parse ! "
             "flvmux ! "
-            'rtmpsink location="rtmp://localhost/rtmp/live live=1"'
+            'rtmpsink location="rtmp://0.0.0.0/rtmp/live live=1"'
         )
 
     writer = cv2.VideoWriter(pipeline, cv2.CAP_GSTREAMER, 0, 30.0, (1920, 1080))
