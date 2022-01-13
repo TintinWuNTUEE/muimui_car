@@ -8,7 +8,7 @@ import asyncio
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.contrib.signaling import object_to_string, object_from_string
 
-from motor import Motor, MotorDriver
+from motor import MotorDriver
 
 VERBOSE = False
 RUNNING = True
