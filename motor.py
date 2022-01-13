@@ -44,22 +44,3 @@ class MotorDriver():
             pwm.setDutycycle(self.PWMB, 0)
         
 
-
-try:
-    Motor = MotorDriver()
-    # control 2 motor
-    Motor.MotorRun(0, 'forward', 100)
-    Motor.MotorRun(1, 'backward', 100)
-    print("sssssssss1")
-    while(1):
-        time.sleep(1);
-
-except IOError as e:
-    print(e)
-    
-except KeyboardInterrupt:    
-    print("\r\nctrl + c:")
-    Motor.MotorRun(0, 'forward', 0)
-    Motor.MotorRun(1, 'backward', 0)
-    exit()
-

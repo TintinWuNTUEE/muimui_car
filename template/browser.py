@@ -12,7 +12,7 @@ from aiortc.contrib.signaling import object_to_string, object_from_string
 
 VERBOSE = False
 RUNNING = True
-HEALTHCHECKS = 10
+HEALTHCHECKS = 100
 
 async def step1_wait_for_jetson_sdp(pc):
     string = input("Jetson SDP:")
