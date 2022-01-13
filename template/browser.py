@@ -110,12 +110,12 @@ if __name__ == "__main__":
     # Run main event loop
     pc = RTCPeerConnection()
     coro = main(pc)
-    thread = threading.Thread(target=watch_streaming, args=(args['ip']))
-    thread.start()
+    # thread = threading.Thread(target=watch_streaming, args=(args['ip']))
+    # thread.start()
     try:
 
         loop = asyncio.get_event_loop()
         loop.run_until_complete(coro)
-        thread.join()
+        # thread.join()
     except KeyboardInterrupt:
         pass
