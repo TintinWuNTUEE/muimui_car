@@ -29,9 +29,19 @@ def MotorForward(Motor):
     return
 
 def MotorLeftward(Motor):
+    Motor.MotorRun(0, 'backward', 100)
+    Motor.MotorRun(1, 'backward', 100)
+    time.sleep(0.01)
+    Motor.MotorStop(0)
+    Motor.MotorStop(1)
     return
 
 def MotorRightward(Motor):
+    Motor.MotorRun(0, 'forward', 100)
+    Motor.MotorRun(1, 'forward', 100)
+    time.sleep(0.01)
+    Motor.MotorStop(0)
+    Motor.MotorStop(1)
     return
 
 def MotorBackward(Motor):
