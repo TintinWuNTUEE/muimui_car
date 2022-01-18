@@ -44,3 +44,11 @@ class MotorDriver():
             pwm.setDutycycle(self.PWMB, 0)
         
 
+if __name__ == "__main__":
+    print("----- test motor ----")
+    motor = MotorDriver()
+    motor.MotorRun(0, 'forward', 100)
+    motor.MotorRun(1, 'backward', 100)
+    time.sleep(1)
+    motor.MotorStop(0)
+    motor.MotorStop(1)
