@@ -32,7 +32,8 @@ def ResetMotor(Motor):
     Motor.MotorStop(0)
     Motor.MotorStop(1)
     return
-def onChange(control,message,Motor):
+def onChange(message,Motor):
+    global control
     if control!=message:
         control = message
         ResetMotor(Motor)
@@ -108,8 +109,8 @@ async def main(pc,Motor):
             return
         print(f"[RECV]: key '{message}'")
         # move motor and stop
-        Move(message,Motor)
-        timer = threading.Timer(INSTRUCTION_INTERVAL, onChange, args=(control,message,Motor,))
+        Move(control,Motor)
+        timer = threading.Timer(INSTRUCTION_INTERVAL, onChange, args=(message,Motor,))
         timer.start()
         # time.sleep(INSTRUCTION_INTERVAL)
         # ResetMotor(Motor)

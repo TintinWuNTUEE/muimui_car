@@ -89,6 +89,7 @@ async def main(pc, sdp):
                     channel.send(f"{chr(key)}")
                 else:
                     img = cv2.imread(f'controller/controller.jpg')
+                    channel.send(f"{chr(key)}")
                 await asyncio.sleep(0.05)
             cv2.destroyAllWindows()
             RUNNING = False
@@ -239,3 +240,4 @@ if __name__ == "__main__":
     #     watch_streaming(args['ip'])
     # except KeyboardInterrupt:
     #     pass
+
