@@ -17,6 +17,7 @@ HEALTHCHECKS = 100
 HEALTH_INTERVAL = 1
 INSTRUCTION_INTERVAL = 0.1
 
+control = ""
 def Move(message,Motor):
     if message =="w":
         MotorForward(Motor)
@@ -31,11 +32,15 @@ def ResetMotor(Motor):
     Motor.MotorStop(0)
     Motor.MotorStop(1)
     return
-
+def onChange(control,message,Motor):
+    if control!=message:
+        control = message
+        ResetMotor(Motor)
+    return
 
 def MotorForward(Motor):
-    Motor.MotorRun(0, 'forward', 100)
-    Motor.MotorRun(1, 'backward', 100)
+    Motor.MotorRun(0, 'backward', 100)
+    Motor.MotorRun(1, 'forward', 100)
     # time.sleep(0.01)
     # Motor.MotorStop(0)
     # Motor.MotorStop(1)
@@ -58,8 +63,8 @@ def MotorRightward(Motor):
     return
 
 def MotorBackward(Motor):
-    Motor.MotorRun(0, 'backward', 100)
-    Motor.MotorRun(1, 'forward', 100)
+    Motor.MotorRun(0, 'forward', 100)
+    Motor.MotorRun(1, 'backward', 100)
     # time.sleep(0.01)
     # Motor.MotorStop(0)
     # Motor.MotorStop(1)
@@ -104,7 +109,7 @@ async def main(pc,Motor):
         print(f"[RECV]: key '{message}'")
         # move motor and stop
         Move(message,Motor)
-        timer = threading.Timer(INSTRUCTION_INTERVAL, ResetMotor, args=(Motor,))
+        timer = threading.Timer(INSTRUCTION_INTERVAL, onChange, args=(control,message,Motor,))
         timer.start()
         # time.sleep(INSTRUCTION_INTERVAL)
         # ResetMotor(Motor)
