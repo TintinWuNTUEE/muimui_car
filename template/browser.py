@@ -217,7 +217,6 @@ def watch_streaming(url, previewName):
 if __name__ == "__main__":
     parser = argparse.ArgumentParser()
     parser.add_argument("-v", "--verbose", action='store_true')
-    parser.add_argument("--ip", type=str, help="ip address of car")
     args = vars(parser.parse_args())
     VERBOSE = args['verbose']
     
@@ -226,15 +225,13 @@ if __name__ == "__main__":
     thd.start()
     pc = RTCPeerConnection()
     coro = main(pc)
-    # cam = camThread(previewName="C", url=args['ip'])
-    # thd = mp.Process(target=cam.get_frame, args=())
-    
+    # thread = threading.Thread(target=watch_streaming, args=(args['ip']))
+    # thread.start()
     try:
 
-        # loop = asyncio.get_event_loop()
-        # loop.run_until_complete(coro)
-        asyncio.run(coro)
-        # thd.join()
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(coro)
+        # thread.join()
     except KeyboardInterrupt:
         # thd.terminate()
         pass

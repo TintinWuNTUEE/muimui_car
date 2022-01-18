@@ -4,9 +4,6 @@ import logging
 import threading
 import argparse
 import asyncio
-import cv2
-import argparse
-import multiprocessing as mp
 
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.contrib.signaling import object_to_string, object_from_string
@@ -124,7 +121,6 @@ if __name__ == "__main__":
     args = vars(parser.parse_args())
     VERBOSE = args['verbose']
     Motor = MotorDriver()
-    
     # Run main event loop
     pc = RTCPeerConnection()
     coro = main(pc,Motor)
