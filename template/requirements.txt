@@ -1,2 +1,10 @@
 aiortc==1.2.0
 opencv-python==4.5.3.56
+PyQt5==5.15.6
+PyQt5-Qt5==5.15.2
+PyQt5-sip==12.9.0
+QtPy==2.0.0
+QDarkStyle==3.0.3
+imutils==0.5.4
+
+
