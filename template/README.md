@@ -14,3 +14,9 @@ $ python3 jetson.py
 ```python
 $ python3 browser.py
 ```
+
+- if multiprocessing shows error, try
+```bash
+export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+```
+
