@@ -34,7 +34,7 @@ DURATION=0
 control = ""
 
 ws_start = 'ws://'
-endpoints = 'localhost:8000/'
+endpoints = '192.168.122.97:8000/'
 path_name = 'ws/chat/'
 
 def Move(Motor):
@@ -61,6 +61,7 @@ def onChange(message,Motor):
 def TimeOut(ws,loop,coro):
     global DURATION
     DURATION = 0 
+    print("time out!!")
     ws.send("time out!!")
     loop.close()
     loop = asyncio.get_event_loop()
