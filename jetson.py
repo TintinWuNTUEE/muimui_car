@@ -5,7 +5,7 @@ import threading
 import argparse
 import asyncio
 import multiprocessing as mp
-
+import codecs
 
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.contrib.signaling import object_to_string, object_from_string
@@ -19,8 +19,9 @@ import _thread as thread
 import time
 
 VERBOSE = False
+
 RUNNING = True
-HEALTHCHECKS = 100
+HEALTHCHECKS = 10000000
 
 HEALTH_INTERVAL = 1
 INSTRUCTION_INTERVAL = 0.1
@@ -28,8 +29,7 @@ INSTRUCTION_INTERVAL = 0.1
 SERVER_IP="0.0.0.0"
 PORT="9999"
 
-JETSON_SDP =""
-BROWSER_SDP=""
+BROWSER_SDP=None
 DURATION=0
 control = ""
 
@@ -59,8 +59,10 @@ def onChange(message,Motor):
 
 
 def TimeOut(ws,loop,coro):
-    global DURATION
+    global DURATION,BROWSER_SDP,control
     DURATION = 0 
+    BROWSER_SDP = None
+    control = ""
     print("time out!!")
     ws.send("time out!!")
     loop.close()
@@ -69,21 +71,21 @@ def TimeOut(ws,loop,coro):
 
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
-    tmp = message.split("\@/")
-    message,time = tmp[0],tmp[1]
-    time = int(time)
-    BROWSER_SDP = message
-    DURATION = time
+    message_dic = json.load(message)
+    BROWSER_SDP = RTCSessionDescription(message_dic["sdp"], message_dic["type"])
+    DURATION = message_dic["duration"]
 def on_error(ws, error):
     print("error", error)
 def on_close(ws, close_code, _):
     print("##close##")
 
+
+
 async def step1_wait_for_browser_sdp(pc):
-    string = BROWSER_SDP
-    while string == "":
-        asyncio.sleep(0.5)
-    sdp = object_from_string(string)
+    while BROWSER_SDP == None:
+        await asyncio.sleep(0.5)
+    sdp = BROWSER_SDP["sdp"]
+    typ = BROWSER_SDP["type"]
     await pc.setRemoteDescription(sdp)
 
 async def step2_running_loop():
@@ -124,13 +126,10 @@ async def main(pc,Motor,ws):
         # ResetMotor(Motor)
     await pc.setLocalDescription(await pc.createOffer())
     #jetson sdp
-    global JETSON_SDP 
-    JETSON_SDP = object_to_string(pc.localDescription)
-    obj = obj = json.dumps({
-                "message": JETSON_SDP
-            })
+    offer = pc.localDescription
+    obj = json.dumps({ "sdp":offer.sdp,"type":offer.type})
     ws.send(obj)
-    print(object_to_string(pc.localDescription))
+    print(json.loads(obj))
     print("===================================")
     await step1_wait_for_browser_sdp(pc)
     await step2_running_loop()
