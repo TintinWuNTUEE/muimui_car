@@ -69,7 +69,8 @@ def TimeOut(ws,loop,coro):
 
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
-    message,time = message.split("\@/")
+    tmp = message.split("\@/")
+    message,time = tmp[0],tmp[1]
     time = int(time)
     BROWSER_SDP = message
     DURATION = time
@@ -79,7 +80,9 @@ def on_close(ws, close_code, _):
     print("##close##")
 
 async def step1_wait_for_browser_sdp(pc):
-    string = input("Browser SDP:")
+    string = BROWSER_SDP
+    while string == "":
+        asyncio.sleep(0.5)
     sdp = object_from_string(string)
     await pc.setRemoteDescription(sdp)
 
@@ -123,7 +126,10 @@ async def main(pc,Motor,ws):
     #jetson sdp
     global JETSON_SDP 
     JETSON_SDP = object_to_string(pc.localDescription)
-    ws.send(JETSON_SDP)
+    obj = obj = json.dumps({
+                "message": JETSON_SDP
+            })
+    ws.send(obj)
     print(object_to_string(pc.localDescription))
     print("===================================")
     await step1_wait_for_browser_sdp(pc)
@@ -139,7 +145,7 @@ if __name__ == "__main__":
                               on_message=on_message,
                               on_error=on_error,
                               on_close=on_close)
-    thd = threading.Thread(ws.run_forever)
+    thd = threading.Thread(target=ws.run_forever)
     thd.start()
 
     VERBOSE = args['verbose']
