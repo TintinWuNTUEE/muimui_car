@@ -10,7 +10,7 @@ import multiprocessing as mp
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.contrib.signaling import object_to_string, object_from_string
 
-from motor import MotorDriver
+from motor import MotorDriver,MotorForward,MotorBackward,MotorLeftward,MotorRightward,ResetMotor
 
 import socket
 import websocket
@@ -49,10 +49,6 @@ def Move(Motor):
     elif control =="a":
         MotorRightward(Motor)
 
-def ResetMotor(Motor):
-    Motor.MotorStop(0)
-    Motor.MotorStop(1)
-    return
 def onChange(message,Motor):
     global control
     if control!=message:
@@ -60,37 +56,15 @@ def onChange(message,Motor):
         ResetMotor(Motor)
     return
 
-def MotorForward(Motor):
-    Motor.MotorRun(0, 'backward', 100)
-    Motor.MotorRun(1, 'forward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
-    return
 
-def MotorLeftward(Motor):
-    Motor.MotorRun(0, 'backward', 100)
-    Motor.MotorRun(1, 'backward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
-    return
 
-def MotorRightward(Motor):
-    Motor.MotorRun(0, 'forward', 100)
-    Motor.MotorRun(1, 'forward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
-    return
-
-def MotorBackward(Motor):
-    Motor.MotorRun(0, 'forward', 100)
-    Motor.MotorRun(1, 'backward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
-    return
+def TimeOut(ws,loop,coro):
+    global DURATION
+    DURATION = 0 
+    ws.send("time out!!")
+    loop.close()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(coro)
 
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
@@ -102,17 +76,6 @@ def on_error(ws, error):
     print("error", error)
 def on_close(ws, close_code, _):
     print("##close##")
-def on_open(ws):
-    # print("open connection")
-    def run(*arg):
-        while True:
-            msg = JETSON_SDP
-            obj = json.dumps({
-                "sdp": msg
-            })
-            # print(obj)
-            ws.send(obj)
-    thread.start_new_thread(run, ())
 
 async def step1_wait_for_browser_sdp(pc):
     string = input("Browser SDP:")
@@ -125,7 +88,7 @@ async def step2_running_loop():
         HEALTHCHECKS -= 1
         await asyncio.sleep(1)
 
-async def main(pc,Motor):
+async def main(pc,Motor,ws):
 
     channel = pc.createDataChannel("chat")
 
@@ -159,6 +122,7 @@ async def main(pc,Motor):
     #jetson sdp
     global JETSON_SDP 
     JETSON_SDP = object_to_string(pc.localDescription)
+    ws.send(JETSON_SDP)
     print(object_to_string(pc.localDescription))
     print("===================================")
     await step1_wait_for_browser_sdp(pc)
@@ -169,26 +133,24 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action='store_true')
     args = vars(parser.parse_args())
     server_path = ws_start+endpoints+path_name
-    # websocket.enableTrace(True)
+    websocket.enableTrace(False)
     ws = websocket.WebSocketApp(server_path,
-                              on_open=on_open,
                               on_message=on_message,
                               on_error=on_error,
                               on_close=on_close)
-    thd = mp.Process(target=ws.run_forever,args=None,name="socket")
+    thd = threading.Thread(ws.run_forever)
     thd.start()
 
     VERBOSE = args['verbose']
     Motor = MotorDriver()
     # Run main event loop
     pc = RTCPeerConnection()
-    coro = main(pc,Motor)
+    coro = main(pc,Motor,ws)
 
     try:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(coro)
-        ws.close()
-        ws = None
+        timer = threading.Timer(DURATION,TimeOut,args=(ws,loop,coro))
 
     except KeyboardInterrupt:
         pass
