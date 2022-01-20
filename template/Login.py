@@ -58,6 +58,7 @@ class logindialog(QtWidgets.QDialog):
     def on_clicked(self):
         global TOKEN
         TOKEN = self.tokenEdit.text()
+        self.tokenEdit.setText("")
         self.doRequest()
 
     def doRequest(self):   
@@ -92,7 +93,6 @@ class logindialog(QtWidgets.QDialog):
         else:
             print("Error occured: ", er)
             print(reply.errorString())
-            self.tokenEdit.setText("")
             msg = QtWidgets.QMessageBox()
             msg.setIcon(QtWidgets.QMessageBox.Critical)
             msg.setText("Error")
@@ -114,10 +114,11 @@ if __name__ == "__main__":
     dialog = logindialog()
     if dialog.exec_() == QtWidgets.QDialog.Accepted:
         dialog.close()
+        QCoreApplication.quit()
         pc = RTCPeerConnection()
-        coro = main(pc, SDP)
-        # thd = mp.Process(target=watch_streaming, args=(IP_ADDR, "CONTROLLER",))
-        # thd.start()
+        coro = main(pc, sdp=SDP, carID=CAR_ID)
+        thd = mp.Process(target=watch_streaming, args=(IP_ADDR, "STREAMING",))
+        thd.start()
         try:
             asyncio.run(coro)
             thd.join()

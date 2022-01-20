@@ -19,4 +19,8 @@ $ python3 browser.py
 ```bash
 export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
 ```
+- or just run
+```bash
+./muimui_app
+```
 

@@ -37,13 +37,14 @@ async def step2_running_loop():
         HEALTHCHECKS -= 1
         await asyncio.sleep(1)
 
-async def send_answer(server_link, pc):
+async def send_answer(server_link, pc, carID):
     print("post")
     async with aiohttp.ClientSession() as session:
         async with session.post(server_link, 
             json=json.dumps({
+                "carID": carID,
                 "sdp":pc.localDescription.sdp,
-                "type":pc.localDescription.type,
+                # "type":pc.localDescription.type,
             })
         ) as response:
 
@@ -56,7 +57,7 @@ async def send_answer(server_link, pc):
             else:
                 print("error")
 
-async def main(pc, sdp=None):
+async def main(pc, sdp=None, carID=""):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
@@ -114,8 +115,8 @@ async def main(pc, sdp=None):
     await step1_wait_for_jetson_sdp(pc, sdp)
     print("===================================")
     print(object_to_string(pc.localDescription))
-    await send_answer(SERVER_LINK, pc)
-    # await step2_running_loop()
+    await send_answer(SERVER_LINK, pc, carID)
+    await step2_running_loop()
 
 class controllerThread():
     def __init__(self, previewName):
@@ -195,7 +196,7 @@ class camThread:
 
         
     def watch_streaming(self):
-        print(self.url)
+        print(f"streaming from{self.url}")
         # cv2.namedWindow(self.previewName)
         cap = cv2.VideoCapture(f'rtmp://{self.url}/rtmp/live')
         while cap.isOpened():
