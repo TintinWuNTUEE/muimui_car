@@ -9,6 +9,7 @@ import cv2
 import imutils
 from PyQt5.QtCore import pyqtSlot
 from browser import *
+from app import * 
 
 import asyncio
 import aiohttp
@@ -34,7 +35,6 @@ class logindialog(QtWidgets.QDialog):
         self.resize(200, 200)
         self.setFixedSize(self.width(), self.height())
         self.setWindowFlags(QtCore.Qt.WindowCloseButtonHint)
-        # self.setWindowIcon(QtGui.QIcon('./logo128.png'))
 
         self.frame = QtWidgets.QFrame(self)
         self.verticalLayout = QtWidgets.QVBoxLayout(self.frame)
@@ -66,7 +66,7 @@ class logindialog(QtWidgets.QDialog):
     def doRequest(self):   
         server_link = os.getenv('SERVER_LINK')
         url = server_link + TOKEN + '/'
-        print(f"send to {url}")
+        # print(f"send to {url}")
 
         req = QtNetwork.QNetworkRequest(QUrl(url))
         self.nam = QtNetwork.QNetworkAccessManager()
@@ -102,9 +102,6 @@ class logindialog(QtWidgets.QDialog):
             msg.setWindowTitle("Error")
             msg.exec_()
 
-        
-
-
     
 
 if __name__ == "__main__":
@@ -116,18 +113,19 @@ if __name__ == "__main__":
     dialog = logindialog()
     if dialog.exec_() == QtWidgets.QDialog.Accepted:
         dialog.close()
+        
         # QCoreApplication.quit()
         pc = RTCPeerConnection()
+        coro = main(pc, sdp=SDP, carID=CAR_ID)
+        thd = mp.Process(target=watch_streaming, args=(IP_ADDR, "STREAMING",))
+        thd.start()       
         try:
-            coro = main(pc, sdp=SDP, carID=CAR_ID)
-            thd = mp.Process(target=watch_streaming, args=(IP_ADDR, "STREAMING",))
-            thd.start()
-            asyncio.run(coro)
+            asyncio.run(coro)           
             thd.join()
         except Exception as e:
             print(e)
             thd.terminate()
-            pass
+            exit_application()
         sys.exit(app.exec_())
 
     
