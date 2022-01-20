@@ -67,14 +67,15 @@ def TimeOut(ws):
     BROWSER_SDP = None
     control = ""
     print("time out!!")
-    obj = json.dumps({"sdp":JETSON_SDP.sdp,"type":JETSON_SDP.type,"timeout":True})
+    obj = json.dumps({"sdp":JETSON_SDP.sdp,"timeout":True})
     ws.send(obj)
 
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
     message_dic = json.loads(message)
     print(message_dic)
-    BROWSER_SDP = RTCSessionDescription(message_dic["sdp"], message_dic["type"])
+    dic = {"sdp":message_dic['sdp'],"type":'answer'}
+    BROWSER_SDP = RTCSessionDescription(sdp = dic["sdp"] ,type = dic["type"])
     DURATION = message_dic["duration"]
 def on_error(ws, error):
     print("error", error)
@@ -128,7 +129,7 @@ async def main(pc,Motor,ws):
     #jetson sdp
     global JETSON_SDP
     JETSON_SDP = pc.localDescription
-    obj = json.dumps({"sdp":JETSON_SDP.sdp,"type":JETSON_SDP.type,"timeout":False})
+    obj = json.dumps({"sdp":JETSON_SDP.sdp,"timeout":False})
     ws.send(obj)
     print(json.loads(obj))
     print("===================================")
