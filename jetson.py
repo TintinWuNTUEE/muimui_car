@@ -84,9 +84,7 @@ def on_close(ws, close_code, _):
 async def step1_wait_for_browser_sdp(pc):
     while BROWSER_SDP == None:
         await asyncio.sleep(0.5)
-    sdp = BROWSER_SDP["sdp"]
-    typ = BROWSER_SDP["type"]
-    await pc.setRemoteDescription(sdp)
+    await pc.setRemoteDescription(BROWSER_SDP)
 
 async def step2_running_loop():
     global RUNNING, HEALTHCHECKS

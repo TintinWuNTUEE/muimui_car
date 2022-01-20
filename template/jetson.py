@@ -11,6 +11,16 @@ from aiortc.contrib.signaling import object_to_string, object_from_string
 VERBOSE = False
 RUNNING = True
 HEALTHCHECKS = 100
+DURATION = 10
+
+def TimeOut(loop,coro):
+    global DURATION
+    DURATION = 0 
+    print("time out!!")
+    loop.close()
+    loop = asyncio.get_event_loop()
+    loop.run_until_complete(coro)
+
 
 async def step1_wait_for_browser_sdp(pc):
     string = input("Browser SDP:")
@@ -68,5 +78,6 @@ if __name__ == "__main__":
     try:
         loop = asyncio.get_event_loop()
         loop.run_until_complete(coro)
+        timer = threading.Timer(DURATION,TimeOut,args=(loop,coro))
     except KeyboardInterrupt:
         pass
