@@ -86,7 +86,10 @@ def on_close(ws, close_code, _):
 async def step1_wait_for_browser_sdp(pc):
     while BROWSER_SDP == None:
         await asyncio.sleep(0.5)
-    await pc.setRemoteDescription(BROWSER_SDP)
+    if isinstance(BROWSER_SDP, RTCSessionDescription):
+        await pc.setRemoteDescription(BROWSER_SDP)
+    else:
+        print("Your input is not a valid RTCsdp!!")
 
 async def step2_running_loop():
     global RUNNING, DURATION
