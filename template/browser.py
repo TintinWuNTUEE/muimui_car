@@ -25,7 +25,8 @@ async def step1_wait_for_jetson_sdp(pc, sdp):
         string = sdp
     else:
         string = input("Jetson SDP:")
-    sdp = object_from_string(string)
+    dic = {'sdp':string,'type':'offer'}
+    sdp = RTCSessionDescription(dic['sdp'],dic['type'])
     if isinstance(sdp, RTCSessionDescription):
         await pc.setRemoteDescription(sdp)
         await pc.setLocalDescription(await pc.createAnswer())
