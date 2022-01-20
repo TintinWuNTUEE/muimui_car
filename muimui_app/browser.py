@@ -119,6 +119,7 @@ async def main(pc, sdp=None, carID=""):
             cv2.destroyAllWindows()
             RUNNING = False
             cv2.waitKey(1)
+            exit_application()
 
         asyncio.ensure_future(report_health())
         asyncio.ensure_future(run_controller())
@@ -137,12 +138,14 @@ def watch_streaming(url, previewName):
     while cap.isOpened():
         success, img = cap.read()
         if success:
-            if cv2.waitKey(1) & 0xFF == ord('q'):
+            if cv2.waitKey(1) & 0xFF == 27:
                 break
+            img = cv2.flip(img,-1)
             cv2.imshow(previewName, img)   
     print("end...")
     cap.release()
     cv2.destroyAllWindows()
+    exit_application()
     
 
 if __name__ == "__main__":
