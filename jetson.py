@@ -54,7 +54,7 @@ def onChange(message,Motor):
     global control
     if control!=message:
         control = message
-        ResetMotor(Motor)
+    ResetMotor(Motor)
     return
 
 
@@ -105,7 +105,8 @@ async def main(pc,Motor,ws):
             """Send active message to jetson nano"""
             while True:
                 channel.send("active")
-                print("send active")
+                if DURATION==1:
+                    channel.send("esc")
                 await asyncio.sleep(HEALTH_INTERVAL)
         asyncio.ensure_future(report_health())
 
@@ -113,18 +114,18 @@ async def main(pc,Motor,ws):
     def on_message(message):
         global RUNNING, HEALTHCHECKS, VERBOSE
         print(message)
+        
         if message == 'esc':
             RUNNING = False
             return
         elif message == 'active':
             HEALTHCHECKS = 10
-            print("active")
             if VERBOSE:
                 print("[RENEW] Healthcheck")
             return
         # move motor and stop
+        Move(Motor)
         timer = threading.Timer(INSTRUCTION_INTERVAL, onChange, args=(message,Motor,))
-        Move(control,Motor)
         timer.start()
         # time.sleep(INSTRUCTION_INTERVAL)
         # ResetMotor(Motor)
@@ -159,8 +160,9 @@ if __name__ == "__main__":
         while True:
             pc = RTCPeerConnection()
             coro = main(pc,Motor,ws)
-            loop = asyncio.get_event_loop()
+            loop = asyncio.new_event_loop()
             loop.run_until_complete(coro)
             TimeOut(ws)
+            loop.close()
     except KeyboardInterrupt:
         pass
