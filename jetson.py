@@ -7,8 +7,6 @@ import asyncio
 import multiprocessing as mp
 import codecs
 
-from numpy import object0
-
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.contrib.signaling import object_to_string, object_from_string
 
@@ -25,7 +23,7 @@ VERBOSE = False
 RUNNING = True
 HEALTHCHECKS = 10
 
-HEALTH_INTERVAL = 1
+HEALTH_INTERVAL = 0.1
 INSTRUCTION_INTERVAL = 0.1
 
 SERVER_IP="0.0.0.0"
@@ -56,13 +54,13 @@ def onChange(message,Motor):
     global control
     if control!=message:
         control = message
-        ResetMotor(Motor)
+    ResetMotor(Motor)
     return
 
 
 
 def TimeOut(ws):
-    global DURATION,BROWSER_SDP,control
+    global DURATION,JETSON_SDP,BROWSER_SDP,control
     DURATION = 0 
     BROWSER_SDP = None
     control = ""
@@ -73,8 +71,10 @@ def TimeOut(ws):
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
     message_dic = json.loads(message)
-    print(message_dic)
-    BROWSER_SDP = RTCSessionDescription(message_dic["sdp"], message_dic["type"])
+    dic = {"sdp":message_dic["sdp"],"type":"answer"}
+    print(dic)
+    BROWSER_SDP = RTCSessionDescription(sdp = dic["sdp"] ,type = dic["type"])
+    
     DURATION = message_dic["duration"]
 def on_error(ws, error):
     print("error", error)
@@ -107,12 +107,16 @@ async def main(pc,Motor,ws):
             """Send active message to jetson nano"""
             while True:
                 channel.send("active")
+                if DURATION==1:
+                    channel.send("esc")
                 await asyncio.sleep(HEALTH_INTERVAL)
         asyncio.ensure_future(report_health())
 
     @channel.on("message")
     def on_message(message):
         global RUNNING, HEALTHCHECKS, VERBOSE
+        print(message)
+        
         if message == 'esc':
             RUNNING = False
             return
@@ -122,7 +126,7 @@ async def main(pc,Motor,ws):
                 print("[RENEW] Healthcheck")
             return
         # move motor and stop
-        Move(control,Motor)
+        Move(Motor)
         timer = threading.Timer(INSTRUCTION_INTERVAL, onChange, args=(message,Motor,))
         timer.start()
         # time.sleep(INSTRUCTION_INTERVAL)
@@ -131,9 +135,9 @@ async def main(pc,Motor,ws):
     #jetson sdp
     global JETSON_SDP
     JETSON_SDP = pc.localDescription
-    obj = json.dumps({"sdp":JETSON_SDP.sdp,"type":JETSON_SDP.type,"timeout":False})
+    obj = json.dumps({"sdp":JETSON_SDP.sdp,"timeout":False})
     ws.send(obj)
-    print(json.loads(obj))
+    print(object_to_string(JETSON_SDP))
     print("===================================")
     await step1_wait_for_browser_sdp(pc)
     await step2_running_loop()
@@ -158,8 +162,9 @@ if __name__ == "__main__":
         while True:
             pc = RTCPeerConnection()
             coro = main(pc,Motor,ws)
-            loop = asyncio.get_event_loop()
+            loop = asyncio.new_event_loop()
             loop.run_until_complete(coro)
             TimeOut(ws)
+            loop.close()
     except KeyboardInterrupt:
         pass
