@@ -10,7 +10,7 @@ from aiortc.contrib.signaling import object_to_string, object_from_string
 
 VERBOSE = False
 RUNNING = True
-HEALTHCHECKS = 100
+HEALTHCHECKS = 10
 
 async def step1_wait_for_browser_sdp(pc):
     string = input("Browser SDP:")
@@ -23,7 +23,7 @@ async def step2_running_loop():
         HEALTHCHECKS -= 1
         await asyncio.sleep(1)
 
-async def main(pc):
+async def control(pc):
 
     channel = pc.createDataChannel("chat")
 
@@ -43,7 +43,7 @@ async def main(pc):
             RUNNING = False
             return
         elif message == 'active':
-            HEALTHCHECKS = 10
+            # HEALTHCHECKS = 10
             if VERBOSE:
                 print("[RENEW] Healthcheck")
             return
@@ -54,6 +54,16 @@ async def main(pc):
     print("===================================")
     await step1_wait_for_browser_sdp(pc);
     await step2_running_loop()
+async def looping():
+    while True:
+        await asyncio.sleep(1)
+def main():
+    while True:
+        pc = RTCPeerConnection()
+        coro = control(pc)
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(coro)
+
 
 
 if __name__ == "__main__":
@@ -61,12 +71,4 @@ if __name__ == "__main__":
     parser.add_argument("-v", "--verbose", action='store_true')
     args = vars(parser.parse_args())
     VERBOSE = args['verbose']
-
-    # Run main event loop
-    pc = RTCPeerConnection()
-    coro = main(pc)
-    try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(coro)
-    except KeyboardInterrupt:
-        pass
+    main()
