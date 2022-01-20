@@ -16,11 +16,15 @@ from aiortc.contrib.signaling import object_to_string, object_from_string
 VERBOSE = False
 RUNNING = True
 HEALTHCHECKS = 100
+SERVER_LINK = "http://192.168.137.97:8000/rest/cars/" # "http://localhost:8000/rest/cars/" # 
 
 async def step1_wait_for_jetson_sdp(pc, sdp):
     # string = input("Jetson SDP:")
     # string += ': "offer"}'
-    string = sdp
+    if sdp is not None:
+        string = sdp
+    else:
+        string = input("Jetson SDP:")
     sdp = object_from_string(string)
     if isinstance(sdp, RTCSessionDescription):
         await pc.setRemoteDescription(sdp)
@@ -32,17 +36,26 @@ async def step2_running_loop():
         HEALTHCHECKS -= 1
         await asyncio.sleep(1)
 
-async def send_answer(server_link, sdp):
+async def send_answer(server_link, pc):
+    print("post")
     async with aiohttp.ClientSession() as session:
         async with session.post(server_link, 
-            json={"sdp":sdp} 
+            json=json.dumps({
+                "sdp":pc.localDescription.sdp,
+                "type":pc.localDescription.type,
+            })
         ) as response:
 
             print("Status:", response.status)
             print("Content-type:", response.headers['content-type'])
             print(await response.json())
 
-async def main(pc, sdp):
+            if response.status == 200:
+                print("success")
+            else:
+                print("error")
+
+async def main(pc, sdp=None):
 
     @pc.on("datachannel")
     def on_datachannel(channel):
@@ -99,9 +112,8 @@ async def main(pc, sdp):
     await step1_wait_for_jetson_sdp(pc, sdp)
     print("===================================")
     print(object_to_string(pc.localDescription))
-    # await send_answer("http://localhost:8000/rest/tutorial/", 
-    #     object_to_string(pc.localDescription))
-    await step2_running_loop()
+    await send_answer(SERVER_LINK, pc)
+    # await step2_running_loop()
 
 class controllerThread():
     def __init__(self, previewName):
