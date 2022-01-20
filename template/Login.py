@@ -12,6 +12,8 @@ from browser import *
 
 import asyncio
 import aiohttp
+from dotenv import load_dotenv
+load_dotenv()
 
 
 IP_ADDR = "0.0.0.0"
@@ -62,8 +64,8 @@ class logindialog(QtWidgets.QDialog):
         self.doRequest()
 
     def doRequest(self):   
-
-        url = SERVER_LINK + TOKEN + '/'
+        server_link = os.getenv('SERVER_LINK')
+        url = server_link + TOKEN + '/'
         print(f"send to {url}")
 
         req = QtNetwork.QNetworkRequest(QUrl(url))
@@ -114,15 +116,16 @@ if __name__ == "__main__":
     dialog = logindialog()
     if dialog.exec_() == QtWidgets.QDialog.Accepted:
         dialog.close()
-        QCoreApplication.quit()
+        # QCoreApplication.quit()
         pc = RTCPeerConnection()
-        coro = main(pc, sdp=SDP, carID=CAR_ID)
-        thd = mp.Process(target=watch_streaming, args=(IP_ADDR, "STREAMING",))
-        thd.start()
         try:
+            coro = main(pc, sdp=SDP, carID=CAR_ID)
+            thd = mp.Process(target=watch_streaming, args=(IP_ADDR, "STREAMING",))
+            thd.start()
             asyncio.run(coro)
             thd.join()
-        except KeyboardInterrupt:
+        except Exception as e:
+            print(e)
             thd.terminate()
             pass
         sys.exit(app.exec_())
