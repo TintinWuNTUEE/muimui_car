@@ -7,6 +7,8 @@ import asyncio
 import multiprocessing as mp
 import codecs
 
+from numpy import object0
+
 from aiortc import RTCPeerConnection, RTCSessionDescription, RTCConfiguration, RTCIceServer
 from aiortc.contrib.signaling import object_to_string, object_from_string
 
@@ -35,7 +37,7 @@ DURATION=0
 control = ""
 
 ws_start = 'ws://'
-endpoints = '192.168.122.97:8000/'
+endpoints = '192.168.137.97:8000/'
 path_name = 'ws/chat/'
 
 def Move(Motor):
@@ -65,12 +67,12 @@ def TimeOut(ws):
     BROWSER_SDP = None
     control = ""
     print("time out!!")
-    ws.send("time out!!")
+    obj = json.dumps({"sdp":JETSON_SDP.sdp,"type":JETSON_SDP.type,"timeout":True})
+    ws.send(obj)
 
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
     message_dic = json.loads(message)
-    message_dic = message_dic['message']
     print(message_dic)
     BROWSER_SDP = RTCSessionDescription(message_dic["sdp"], message_dic["type"])
     DURATION = message_dic["duration"]
