@@ -10,17 +10,15 @@ $ pip3 install -r requirements.txt
 ```python
 $ python3 jetson.py
 ```
-- **2. Simulate browser (in network B)**
-```python
-$ python3 browser.py
+- To set up,
+```bash
+# create .env file and fill your SERVER_LINK
+SERVER_LINK=http://localhost:8000/<API>
 ```
 
-- if multiprocessing shows error, try
+- To run
 ```bash
-export OBJC_DISABLE_INITIALIZE_FORK_SAFETY=YES
+$ ./muimui_app
 ```
-- or just run
-```bash
-./muimui_app
-```
+
 
