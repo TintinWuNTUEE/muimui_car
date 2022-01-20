@@ -21,7 +21,7 @@ import time
 VERBOSE = False
 
 RUNNING = True
-HEALTHCHECKS = 10000000
+HEALTHCHECKS = 10
 
 HEALTH_INTERVAL = 1
 INSTRUCTION_INTERVAL = 0.1
@@ -58,16 +58,13 @@ def onChange(message,Motor):
 
 
 
-def TimeOut(ws,loop,coro):
+def TimeOut(ws):
     global DURATION,BROWSER_SDP,control
     DURATION = 0 
     BROWSER_SDP = None
     control = ""
     print("time out!!")
     ws.send("time out!!")
-    loop.close()
-    loop = asyncio.get_event_loop()
-    loop.run_until_complete(coro)
 
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
@@ -87,9 +84,9 @@ async def step1_wait_for_browser_sdp(pc):
     await pc.setRemoteDescription(BROWSER_SDP)
 
 async def step2_running_loop():
-    global RUNNING, HEALTHCHECKS
-    while RUNNING and HEALTHCHECKS > 0:
-        HEALTHCHECKS -= 1
+    global RUNNING, DURATION
+    while RUNNING and DURATION > 0:
+        DURATION -= 1
         await asyncio.sleep(1)
 
 async def main(pc,Motor,ws):
@@ -148,13 +145,12 @@ if __name__ == "__main__":
     VERBOSE = args['verbose']
     Motor = MotorDriver()
     # Run main event loop
-    pc = RTCPeerConnection()
-    coro = main(pc,Motor,ws)
-
     try:
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(coro)
-        timer = threading.Timer(DURATION,TimeOut,args=(ws,loop,coro))
-
+        while True:
+            pc = RTCPeerConnection()
+            coro = main(pc,Motor,ws)
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(coro)
+            TimeOut(ws)
     except KeyboardInterrupt:
         pass
