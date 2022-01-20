@@ -50,35 +50,23 @@ def ResetMotor(Motor):
 
 
 def MotorForward(Motor):
-    Motor.MotorRun(0, 'backward', 100)
-    Motor.MotorRun(1, 'forward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
+    Motor.MotorRun(0, 'forward', 100)
+    Motor.MotorRun(1, 'backward', 100)
     return
 
 def MotorLeftward(Motor):
     Motor.MotorRun(0, 'backward', 100)
     Motor.MotorRun(1, 'backward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
     return
 
 def MotorRightward(Motor):
     Motor.MotorRun(0, 'forward', 100)
     Motor.MotorRun(1, 'forward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
     return
 
 def MotorBackward(Motor):
-    Motor.MotorRun(0, 'forward', 100)
-    Motor.MotorRun(1, 'backward', 100)
-    # time.sleep(0.01)
-    # Motor.MotorStop(0)
-    # Motor.MotorStop(1)
+    Motor.MotorRun(0, 'backward', 100)
+    Motor.MotorRun(1, 'forward', 100)
     return
 
 if __name__ == "__main__":

@@ -29,6 +29,7 @@ INSTRUCTION_INTERVAL = 0.1
 SERVER_IP="0.0.0.0"
 PORT="9999"
 
+JETSON_SDP=None
 BROWSER_SDP=None
 DURATION=0
 control = ""
@@ -68,7 +69,9 @@ def TimeOut(ws):
 
 def on_message(ws, message):
     global DURATION,BROWSER_SDP
-    message_dic = json.load(message)
+    message_dic = json.loads(message)
+    message_dic = message_dic['message']
+    print(message_dic)
     BROWSER_SDP = RTCSessionDescription(message_dic["sdp"], message_dic["type"])
     DURATION = message_dic["duration"]
 def on_error(ws, error):
@@ -121,8 +124,9 @@ async def main(pc,Motor,ws):
         # ResetMotor(Motor)
     await pc.setLocalDescription(await pc.createOffer())
     #jetson sdp
-    offer = pc.localDescription
-    obj = json.dumps({ "sdp":offer.sdp,"type":offer.type})
+    global JETSON_SDP
+    JETSON_SDP = pc.localDescription
+    obj = json.dumps({"sdp":JETSON_SDP.sdp,"type":JETSON_SDP.type,"timeout":False})
     ws.send(obj)
     print(json.loads(obj))
     print("===================================")
