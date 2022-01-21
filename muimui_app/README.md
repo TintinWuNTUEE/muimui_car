@@ -16,9 +16,13 @@ $ python3 jetson.py
 SERVER_LINK=http://localhost:8000/<API>
 ```
 
-- To run
+- To run in dev mode
 ```bash
-$ ./muimui_app
+$ ./muimui_app.sh 
+```
+- To run in real mode
+```bash
+$ ./muimui_app.sh 
 ```
 
 

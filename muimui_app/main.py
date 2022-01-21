@@ -61,6 +61,7 @@ class logindialog(QtWidgets.QDialog):
         global TOKEN
         TOKEN = self.tokenEdit.text()
         self.tokenEdit.setText("")
+        # self.accept()
         self.doRequest()
 
     def doRequest(self):   
@@ -102,7 +103,13 @@ class logindialog(QtWidgets.QDialog):
             msg.setWindowTitle("Error")
             msg.exec_()
 
-    
+
+
+def test():
+    """ test for app quit() """
+    for i in range(10):
+        print(i)
+        time.sleep(0.02)   
 
 if __name__ == "__main__":
     mp.set_start_method('spawn')
@@ -113,19 +120,31 @@ if __name__ == "__main__":
     dialog = logindialog()
     if dialog.exec_() == QtWidgets.QDialog.Accepted:
         dialog.close()
-        
+        # app.quit()
+ 
         # QCoreApplication.quit()
         pc = RTCPeerConnection()
         coro = main(pc, sdp=SDP, carID=CAR_ID)
         thd = mp.Process(target=watch_streaming, args=(IP_ADDR, "STREAMING",))
-        thd.start()       
+             
         try:
-            asyncio.run(coro)           
-            thd.join()
+            thd.start()
+            loop = asyncio.get_event_loop()
+            loop.run_until_complete(coro)
+            # asyncio.run(coro)           
+            thd.terminate()
         except Exception as e:
             print(e)
-            thd.terminate()
+            # thd.terminate()
+            loop.close()
             exit_application()
-        sys.exit(app.exec_())
+
+        msg = QtWidgets.QMessageBox()
+        msg.setIcon(QtWidgets.QMessageBox.Information)
+        msg.setText("Info")
+        msg.setInformativeText("The time is over. Thank you")
+        msg.setWindowTitle("End")
+        msg.exec_()
+    # sys.exit(app.exec_())
 
     

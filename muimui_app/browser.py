@@ -119,7 +119,7 @@ async def main(pc, sdp=None, carID=""):
             cv2.destroyAllWindows()
             RUNNING = False
             cv2.waitKey(1)
-            exit_application()
+            raise Exception("Controller exception")
 
         asyncio.ensure_future(report_health())
         asyncio.ensure_future(run_controller())
@@ -145,7 +145,7 @@ def watch_streaming(url, previewName):
     print("end...")
     cap.release()
     cv2.destroyAllWindows()
-    exit_application()
+    raise Exception("Video Exception")
     
 
 if __name__ == "__main__":
