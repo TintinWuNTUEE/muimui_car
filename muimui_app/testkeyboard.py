@@ -2,6 +2,7 @@ import cv2
 import asyncio
 
 async def myfun():
+    """ test my keyboard """
     cv2.namedWindow("CONTROLLER", cv2.WINDOW_GUI_EXPANDED)
     img = cv2.imread('controller/controller.jpg')
     while True:

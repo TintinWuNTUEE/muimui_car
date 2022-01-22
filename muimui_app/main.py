@@ -131,13 +131,13 @@ if __name__ == "__main__":
             thd.start()
             loop = asyncio.get_event_loop()
             loop.run_until_complete(coro)
-            # asyncio.run(coro)           
+            asyncio.run(coro)           
             thd.terminate()
         except Exception as e:
             print(e)
-            # thd.terminate()
-            loop.close()
-            exit_application()
+            thd.terminate()
+            # loop.close()
+            # exit_application()
 
         msg = QtWidgets.QMessageBox()
         msg.setIcon(QtWidgets.QMessageBox.Information)
